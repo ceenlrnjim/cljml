@@ -7,9 +7,9 @@
   (is (= (norm [2 0]) 2.0))
   (is (= (norm [3 4]) 5.0)))
 
-(deftest test-initialize-clusteroids
+(deftest test-initialize-centroids
   (let [ts (alg/matrix [[1.0 1.0][1.0 2.0] [2.0 1.0][2.0 2.0][5.0 1.0][5.0 2.0] [6.0 1.0] [6.0 2.0]])
-        c (initialize-clusteroids 2 ts)]
+        c (initialize-centroids 2 ts)]
     (is (= (count c) 2))
     (is (every? #(some (partial = %) ts) c))))
     
@@ -23,8 +23,6 @@
         mapping (capture-target ts cs)]
     (is (= mapping {0 [[1 1][1 2][2 1][2 2]] 1 [[5 1][5 2][6 1][6 2]]}))))
 
-;(deftest test-move-clusteroids
-      
 (defn- test-clusters
   "Takes a sequence of sequences of locations and tests that concatenating them, clustering them returns the same
   grouping"
@@ -41,5 +39,5 @@
   (test-clusters [[[0.0 0.0 1.0] [1.0 5.0 1.0] [10.0 2.0 1.0]] [[0.0 0.0 100.0] [3.0 6.0 100.0] [2.0 8.0 100.0]] [[9.0 7.0 300.0][1.0 0.0 300.0] [2.0 2.0 300.0]]])
   (test-clusters [[[1.0 1.0][1.0 2.0] [2.0 1.0][2.0 2.0]] [[5.0 0.5] [6.0 0.6][5.0 1.0][5.0 2.0] [6.0 1.0] [6.0 2.0]]]))
 
-(run-tests)
+;(run-tests)
 
