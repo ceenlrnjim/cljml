@@ -49,6 +49,7 @@
         (alg/div (reduce alg/plus pts) (count pts)))
       (sort mapping)))) ; need value to be at the index that was the key in the ampping
 
+; TODO: make this an optional parameter to kmeans, defaulting to unbound
 (def MAX_ITERS 100)
 
 (defn kmeans
