@@ -20,6 +20,7 @@
                                             ; get a collection of enough elements
   (alg/matrix (map (comp inc (partial * 0)) (range 0 (* rows cols))) cols))
 
+; TODO: switch to incanter.core.conj-cols
 (defn column-cat
   "Concatenates the specified matricies together, adding Y as additional columns to X"
   [x y]
@@ -89,23 +90,23 @@
       (+ oneterm zeroterm)))
 
 (defn forward-prop
+  "Returns the predicted value of the network based on inputs X (mxn) and
+  map of theta values - keyed by layer, maps to theta value matrix.  X is expected to
+  have any X0 bias terms already added."
   [X thetas]
   (let [L (inc (count thetas))
         [setsize featurecount] (alg/dim X) ]
-    (loop [A X
+    (loop [unbiasedA X
            thetaix 1]
-      (println "computing activation values for thetas" thetaix)
-      (println "thetaix=" thetaix "L=" L "A=" (alg/dim A) "theta=" (alg/dim (thetas thetaix)))
-      (if (>= thetaix L)
-        A
-        (let [nextZ (alg/mmult A (alg/trans (thetas thetaix)))
-              nextA (sigmoid nextZ)]
-          (recur
-            ;(if (< thetaix (dec L)) ; for all except the last round, insert bias terms - not sure why but octave code does the same
-             ;(column-cat (alg/matrix (ones setsize 1)) nextA)
-             nextA
-             ;)
-            (inc thetaix)))))))
+      (println "Adding bias column to A (" (alg/dim unbiasedA)") of size [" setsize ",1]")
+      (let [A (column-cat (alg/matrix (ones setsize 1)) unbiasedA)]
+        (println "computing activation values for thetas" thetaix)
+        (println "thetaix=" thetaix "L=" L "A=" (alg/dim A) "theta=" (alg/dim (thetas thetaix)))
+        (if (>= thetaix L)
+          unbiasedA
+            (let [nextZ (alg/mmult A (alg/trans (thetas thetaix)))
+                  nextA (sigmoid nextZ)]
+              (recur nextA (inc thetaix))))))))
 
 (defn regularize
   [lambda m thetamap]

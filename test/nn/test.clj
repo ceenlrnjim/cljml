@@ -53,6 +53,15 @@
   (is (= (alg/matrix [[1 2] [1 2] [1 2]])
         (column-cat (alg/matrix [1 1 1]) (alg/matrix [[2][2][2]])))))
 
+; TODO: octave implementaiton matches, but all ones is pretty suspect - need
+; some more (probably better) tests
+(deftest test-forward-prop
+  (let [X (alg/matrix [[2 4] [1 1] [2 2] [1.4 0.5]])
+        thetas {1 (alg/matrix [[1 2 3] [2 3 4] [3 4 5] [4 5 6] [5 6 7]])
+                2 (alg/matrix [[6 5 4 3 2 1]])}
+        prediction (forward-prop X thetas)]
+    (is (= prediction (alg/matrix [[1.0][1.0][1.0][1.0]])))))
+
 ; TODO: can't have a 0 in prediction or log goes to -infinity
 (deftest test-example-cost
   ; answers come from octave
@@ -60,6 +69,7 @@
   (is (closeto? -0.16252 (example-cost (alg/matrix [[0.85]]) (alg/matrix [[1]]))))
   (is (closeto? -2.2493 (example-cost (alg/matrix [[0.25 0.25 0.25 0.25]]) (alg/matrix [[0 0 1 0]])))))
 
+(comment
 (deftest test-cost
   ; using a 4 input node, 2x4 hidden node, 1 output node model
   (let [thetas {1 (alg/matrix [[1 1 1 1][2 2 2 2][3 3 3 3][4 4 4 4]])
@@ -83,4 +93,4 @@
                        [1 1 1 1]])
         Y (alg/matrix [0 0 0 0 0 0 0 1 0 0 0 1 0 1 1 1])]; any place where 3 or more inputs are active
     (is (closeto? 0 (cost thetas X Y 0)))))
-
+)
