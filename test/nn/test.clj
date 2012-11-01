@@ -56,11 +56,12 @@
 ; TODO: octave implementaiton matches, but all ones is pretty suspect - need
 ; some more (probably better) tests
 (deftest test-forward-prop
-  (let [X (alg/matrix [[2 4] [1 1] [2 2] [1.4 0.5]])
-        thetas {1 (alg/matrix [[1 2 3] [2 3 4] [3 4 5] [4 5 6] [5 6 7]])
-                2 (alg/matrix [[6 5 4 3 2 1]])}
+  ; using a XNOR logic "gate" to test since I can pick the theta values manually
+  (let [X (alg/matrix [[0 0][0 1] [1 0][1 1]])
+        thetas {1 (alg/matrix [[-30 20 20][10 -20 -20]])
+                2 (alg/matrix [[-10 20 20]])}
         prediction (forward-prop X thetas)]
-    (is (= prediction (alg/matrix [[1.0][1.0][1.0][1.0]])))))
+    (is (every? #(closeto? 0 %) (alg/minus (alg/matrix [[1.0][0.0][0.0][1.0]]) prediction)))))
 
 ; TODO: can't have a 0 in prediction or log goes to -infinity
 (deftest test-example-cost

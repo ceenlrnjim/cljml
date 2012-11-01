@@ -91,7 +91,7 @@
 
 (defn forward-prop
   "Returns the predicted value of the network based on inputs X (mxn) and
-  map of theta values - keyed by layer, maps to theta value matrix.  X is expected to
+  map of theta values - keyed by layer, maps to theta value matrix.  X is NOT expected to
   have any X0 bias terms already added."
   [X thetas]
   (let [L (inc (count thetas))
