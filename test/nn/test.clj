@@ -47,16 +47,31 @@
     (is (= (alg/dim (m 3)) [1 11]))))
 
 (deftest test-column-cat
+  ; test the multi-dimensional matrix case
   (is (= (alg/matrix [[1 2 3 4] [1 2 3 4] [1 2 3 4][1 2 3 4]])
         (column-cat (alg/matrix [[1 2][1 2][1 2][1 2]])
                     (alg/matrix [[3 4][3 4][3 4][3 4]]))))
+  ; test two single dimensional vertical vectors
+  (is (= (alg/matrix [[1 2][1 2][1 2][1 2]]) 
+        (column-cat (alg/matrix [[1][1][1][1]]) (alg/matrix [[2][2][2][2]]))))
+  ; test for the pain-in-the-ass matrix to vector conversion stuff
+  (let [x (alg/matrix [[1.0 1.0]])
+        y (alg/matrix [[1.0]])
+        result (column-cat x y)]
+    (is (=  (alg/matrix result [[1.0 1.0 1.0]])))
+    (is (= (alg/dim result) [1 3])))
+  ; test for more single dimension stuff
   (is (= (alg/matrix [[1 2] [1 2] [1 2]])
         (column-cat (alg/matrix [1 1 1]) (alg/matrix [[2][2][2]])))))
 
-; TODO: octave implementaiton matches, but all ones is pretty suspect - need
-; some more (probably better) tests
+(comment
 (deftest test-forward-prop
   ; using a XNOR logic "gate" to test since I can pick the theta values manually
+  (let [X (alg/matrix [[0 0]])
+        thetas {1 (alg/matrix [[-30 20 20][10 -20 -20]])
+                2 (alg/matrix [[-10 20 20]])}
+        prediction (forward-prop X thetas)]
+    (is (every? #(closeto? 0 %) (alg/minus (alg/matrix [[1.0]]) prediction))))
   (let [X (alg/matrix [[0 0][0 1] [1 0][1 1]])
         thetas {1 (alg/matrix [[-30 20 20][10 -20 -20]])
                 2 (alg/matrix [[-10 20 20]])}
@@ -68,30 +83,21 @@
   ; answers come from octave
   (is (closeto? -0.030151 (example-cost (alg/matrix [[0.99 0.01 0.01]]) (alg/matrix [[1 0 0]]))))
   (is (closeto? -0.16252 (example-cost (alg/matrix [[0.85]]) (alg/matrix [[1]]))))
-  (is (closeto? -2.2493 (example-cost (alg/matrix [[0.25 0.25 0.25 0.25]]) (alg/matrix [[0 0 1 0]])))))
+  (is (closeto? -2.2493 (example-cost (alg/matrix [[0.25 0.25 0.25 0.25]]) (alg/matrix [[0 0 1 0]]))))
+  (is (closeto? 0.0 (example-cost 
+                      (forward-prop
+                        (alg/matrix [[0 0]])
+                        ; xnor network
+                        {1 (alg/matrix [[-30 20 20][10 -20 -20]])
+                         2 (alg/matrix [[-10 20 20]])})
+                      (alg/matrix [[1.0]])))))
 
-(comment
 (deftest test-cost
-  ; using a 4 input node, 2x4 hidden node, 1 output node model
-  (let [thetas {1 (alg/matrix [[1 1 1 1][2 2 2 2][3 3 3 3][4 4 4 4]])
-                2 (alg/matrix [[1 1.25 1.50 1.75]])}
-        ; 4 features no bias (note zeros in column one)
-        X (alg/matrix [[0 0 0 0]
-                       [0 0 0 1]
-                       [0 0 1 0]
-                       [0 0 1 1]
-                       [0 1 0 0]
-                       [0 1 0 1]
-                       [0 1 1 0]
-                       [0 1 1 1]
-                       [1 0 0 0]
-                       [1 0 0 1]
-                       [1 0 1 0]
-                       [1 0 1 1]
-                       [1 1 0 0]
-                       [1 1 0 1]
-                       [1 1 1 0]
-                       [1 1 1 1]])
-        Y (alg/matrix [0 0 0 0 0 0 0 1 0 0 0 1 0 1 1 1])]; any place where 3 or more inputs are active
-    (is (closeto? 0 (cost thetas X Y 0)))))
-)
+  (let [X (alg/matrix [[0 0][0 1] [1 0][1 1]])
+        thetas {1 (alg/matrix [[-30 20 20][10 -20 -20]])
+                2 (alg/matrix [[-10 20 20]])}
+        xnorcost (cost thetas X (alg/matrix [[1.0][0.0][0.0][1.0]]) 0.0)]
+    (is (closeto? 0.0 xnorcost))
+    ))
+ ) 
+
