@@ -84,21 +84,24 @@
         prediction (forward-prop X thetas)]
     (is (every? #(closeto? 0 %) (alg/minus (alg/matrix [[1.0][0.0][0.0][1.0]]) prediction)))))
 
-(comment
 ; TODO: can't have a 0 in prediction or log goes to -infinity
 (deftest test-example-cost
   ; answers come from octave
   (is (closeto? -0.030151 (example-cost (alg/matrix [[0.99 0.01 0.01]]) (alg/matrix [[1 0 0]]))))
   (is (closeto? -0.16252 (example-cost (alg/matrix [[0.85]]) (alg/matrix [[1]]))))
   (is (closeto? -2.2493 (example-cost (alg/matrix [[0.25 0.25 0.25 0.25]]) (alg/matrix [[0 0 1 0]]))))
-  (is (closeto? 0.0 (example-cost 
-                      (forward-prop
+  (let [prediction (forward-prop
                         (alg/matrix [[0 0]])
                         ; xnor network
                         {1 (alg/matrix [[-30 20 20][10 -20 -20]])
                          2 (alg/matrix [[-10 20 20]])})
-                      (alg/matrix [[1.0]])))))
+        actual (alg/matrix [[1.0]])]
+    (println "prediction" prediction "actual" actual)
+    (println "prediction" (alg/dim prediction) "actual" (alg/dim actual))
+    (is (closeto? 0.0 (example-cost prediction actual)))))
+              
 
+(comment
 (deftest test-cost
   (let [X (alg/matrix [[0 0][0 1] [1 0][1 1]])
         thetas {1 (alg/matrix [[-30 20 20][10 -20 -20]])
