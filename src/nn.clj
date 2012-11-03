@@ -24,8 +24,8 @@
 (defn column-cat
   "Concatenates the specified matricies together, adding Y as additional columns to X"
   [x y]
-  { ;:pre [(= (first (alg/dim x)) (first (alg/dim y)))] ; must have same number of rows
-    ;:post [(= (alg/dim %) [(first (alg/dim x)) (+ (second (alg/dim x)) (second (alg/dim y)))])]  ; should be same rows, sum of columns
+  { :pre [(= (first (alg/dim x)) (first (alg/dim y)))] ; must have same number of rows
+    :post [(= (alg/dim %) [(first (alg/dim x)) (+ (second (alg/dim x)) (second (alg/dim y)))])]  ; should be same rows, sum of columns
   }
     ;(println "Concatenating " (alg/dim x) "and " (alg/dim y))
     ;(let [[xrows xcols] (alg/dim x)

@@ -48,19 +48,23 @@
 
 (deftest test-column-cat
   ; test the multi-dimensional matrix case
+  (println "testing 4x2 and 4x2")
   (is (= (alg/matrix [[1 2 3 4] [1 2 3 4] [1 2 3 4][1 2 3 4]])
         (column-cat (alg/matrix [[1 2][1 2][1 2][1 2]])
                     (alg/matrix [[3 4][3 4][3 4][3 4]]))))
   ; test two single dimensional vertical vectors
+  (println "testing 4x1 and 4x1")
   (is (= (alg/matrix [[1 2][1 2][1 2][1 2]]) 
         (column-cat (alg/matrix [[1][1][1][1]]) (alg/matrix [[2][2][2][2]]))))
   ; test for the pain-in-the-ass matrix to vector conversion stuff
+  (println "testing 1x2 and 1x1")
   (let [x (alg/matrix [[1.0 1.0]])
         y (alg/matrix [[1.0]])
         result (column-cat x y)]
     (is (=  result (alg/matrix [[1.0 1.0 1.0]])))
     (is (= (alg/dim result) [1 3])))
   ; test for more single dimension stuff
+  (println "testing 1x3 vector and 3x1 matrix")
   (is (= (alg/matrix [[1 2] [1 2] [1 2]])
         (column-cat (alg/matrix [1 1 1]) (alg/matrix [[2][2][2]])))))
 
