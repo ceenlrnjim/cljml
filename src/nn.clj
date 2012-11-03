@@ -104,15 +104,16 @@
         [setsize featurecount] (alg/dim X) ]
     (loop [unbiasedA X
            thetaix 1]
-      (println "Adding bias column to A (" (alg/dim unbiasedA)") of size [" setsize ",1]")
-      (let [A (column-cat (ones setsize 1) unbiasedA)]
-        (println "computing activation values for thetas" thetaix)
-        (println "thetaix=" thetaix "L=" L "A=" (alg/dim A) "theta=" (alg/dim (thetas thetaix)))
-        (if (>= thetaix L)
-          unbiasedA
-            (let [nextZ (alg/mmult A (alg/trans (thetas thetaix)))
-                  nextA (sigmoid nextZ)]
-              (recur nextA (inc thetaix))))))))
+      (if (>= thetaix L)
+        unbiasedA
+        (do
+          (println "Adding bias column to A (" (alg/dim unbiasedA)") of size [" setsize ",1]")
+          (let [A (column-cat (ones setsize 1) unbiasedA)]
+            (println "computing activation values for thetas" thetaix)
+            (println "thetaix=" thetaix "L=" L "A=" (alg/dim A) "theta=" (alg/dim (thetas thetaix)))
+              (let [nextZ (alg/mmult A (alg/trans (thetas thetaix)))
+                    nextA (sigmoid nextZ)]
+                (recur nextA (inc thetaix)))))))))
 
 (defn regularize
   [lambda m thetamap]
