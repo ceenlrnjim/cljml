@@ -5,8 +5,7 @@
 
 (defn sigmoid [x]
     ; 1 / (1 + exp(-x)
-    (let [sigcalc #(/ 1 (+ 1 (alg/exp (* -1 %))))]
-        (if (alg/matrix? x) (alg/matrix (alg/matrix-map sigcalc x)) (sigcalc x))))
+  (alg/div 1 (alg/plus 1 (alg/exp (alg/mult -1 x)))))
 
 (defn sigmoid-gradient [x]
   ; note: element-wise
@@ -20,7 +19,6 @@
                                             ; get a collection of enough elements
   (alg/matrix (map (comp inc (partial * 0)) (range 0 (* rows cols))) cols))
 
-; TODO: switch to incanter.core.conj-cols
 (defn column-cat
   "Concatenates the specified matricies together, adding Y as additional columns to X"
   [x y]
@@ -107,7 +105,7 @@
     (loop [unbiasedA X
            thetaix 1]
       (println "Adding bias column to A (" (alg/dim unbiasedA)") of size [" setsize ",1]")
-      (let [A (column-cat (alg/matrix (ones setsize 1)) unbiasedA)]
+      (let [A (column-cat (ones setsize 1) unbiasedA)]
         (println "computing activation values for thetas" thetaix)
         (println "thetaix=" thetaix "L=" L "A=" (alg/dim A) "theta=" (alg/dim (thetas thetaix)))
         (if (>= thetaix L)

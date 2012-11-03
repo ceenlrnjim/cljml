@@ -12,6 +12,9 @@
   (is (= (sigmoid 0) 0.5))
   (is (< (sigmoid -10) 0.0001))
   (is (> (sigmoid 10) 0.9999))
+  (let [x (alg/matrix [[1 2]])
+        gx (sigmoid x)]
+    (is (= (alg/dim x) (alg/dim gx))))
   (let [m (alg/matrix [[-10 0 10] [-10 0 10] [-10 0 10]])
         sigm (sigmoid m)]
     (is (< (alg/$ 0 0 sigm) 0.0001))
@@ -68,7 +71,6 @@
   (is (= (alg/matrix [[1 2] [1 2] [1 2]])
         (column-cat (alg/matrix [1 1 1]) (alg/matrix [[2][2][2]])))))
 
-(comment
 (deftest test-forward-prop
   ; using a XNOR logic "gate" to test since I can pick the theta values manually
   (let [X (alg/matrix [[0 0]])
@@ -82,6 +84,7 @@
         prediction (forward-prop X thetas)]
     (is (every? #(closeto? 0 %) (alg/minus (alg/matrix [[1.0][0.0][0.0][1.0]]) prediction)))))
 
+(comment
 ; TODO: can't have a 0 in prediction or log goes to -infinity
 (deftest test-example-cost
   ; answers come from octave
