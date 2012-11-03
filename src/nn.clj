@@ -24,13 +24,21 @@
 (defn column-cat
   "Concatenates the specified matricies together, adding Y as additional columns to X"
   [x y]
-  { :pre [(= (first (alg/dim x)) (first (alg/dim y)))] ; must have same number of rows
-    :post [(= (alg/dim %) [(first (alg/dim x)) (+ (second (alg/dim x)) (second (alg/dim y)))])]} ; should be same rows, sum of columns
+  { ;:pre [(= (first (alg/dim x)) (first (alg/dim y)))] ; must have same number of rows
+    ;:post [(= (alg/dim %) [(first (alg/dim x)) (+ (second (alg/dim x)) (second (alg/dim y)))])]  ; should be same rows, sum of columns
+  }
+    ;(println "Concatenating " (alg/dim x) "and " (alg/dim y))
+    ;(let [[xrows xcols] (alg/dim x)
+    ;      [yrows ycols] (alg/dim y)
+    ;      result (alg/matrix (flatten (interleave x y)) (+ xcols ycols))]
+    ;  (println "Result" (alg/dim result))
+    ;  result)
   (let [[xrows xcols] (alg/dim x)
         [yrows ycols] (alg/dim y)]
-    (alg/matrix
-      (flatten (interleave x y)) (+ xcols ycols))))
-
+    ; incanter switches my rows to columns and messes up concatenation
+    (if (= xrows 1) 
+      (alg/to-matrix (alg/conj-cols [x] [y]))
+      (alg/to-matrix (alg/conj-cols x y)))))
 
 (defn drop-column
   [m ix]
@@ -124,7 +132,7 @@
  
 ; TODO: determine if I want to unroll parameters - is it required for optimization libraries?
 (defn cost
-  "Give then specified parameters (map from l to params for layer l to l+1), training set inputs X
+  "Given the specified parameters (map from l to params for layer l to l+1), training set inputs X
   (matrix of m rows and n columns) and yvec training set outputs (vector of size m rows by 1 column)
   and regularization parameter (lambda) regparam, what is the cost?  Note that Xo terms are not-expected to be included.
   Also note that Y could also be a vector where the output is multi-class classification"
@@ -141,8 +149,9 @@
           costsize (count subcosts)
           regterm (regularize regparam m thetas)] ; forcing eval of the lazy sequence
       (+ regterm
-          (/ (reduce (fn [sum costi] (+ sum (* -1 costi))) 0 subcosts)
-              m)))))
+          (* -1 
+             (/ (reduce (fn [sum costi] (+ sum costi)) 0 subcosts)
+              m))))))
 
 
 ; ------------------------------------------- Tested and working above here ---------------------------------

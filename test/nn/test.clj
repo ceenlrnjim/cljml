@@ -58,7 +58,7 @@
   (let [x (alg/matrix [[1.0 1.0]])
         y (alg/matrix [[1.0]])
         result (column-cat x y)]
-    (is (=  (alg/matrix result [[1.0 1.0 1.0]])))
+    (is (=  result (alg/matrix [[1.0 1.0 1.0]])))
     (is (= (alg/dim result) [1 3])))
   ; test for more single dimension stuff
   (is (= (alg/matrix [[1 2] [1 2] [1 2]])
