@@ -95,9 +95,7 @@
                         ; xnor network
                         {1 (alg/matrix [[-30 20 20][10 -20 -20]])
                          2 (alg/matrix [[-10 20 20]])})
-        actual (alg/matrix [[1.0]])]
-    (println "prediction" prediction "actual" actual)
-    (println "prediction" (alg/dim prediction) "actual" (alg/dim actual))
+        actual 1.0]
     (is (closeto? 0.0 (example-cost prediction actual)))))
               
 
