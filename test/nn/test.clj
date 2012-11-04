@@ -84,6 +84,13 @@
         prediction (forward-prop X thetas)]
     (is (every? #(closeto? 0 %) (alg/minus (alg/matrix [[1.0][0.0][0.0][1.0]]) prediction)))))
 
+(deftest test-regularize
+  (let [thetas {1 (alg/matrix [[2 2][2 2]]) 2 (alg/matrix [3 3]) 3 (alg/matrix [[3 3]])}
+        sumsquared (+ 16 18 18)]
+    (is (= (regularize 0 100 thetas) 0.0))
+    (is (= (regularize 1 100 thetas) (double (/ sumsquared 200))))))
+  
+
 ; TODO: can't have a 0 in prediction or log goes to -infinity
 (deftest test-example-cost
   ; answers come from octave
@@ -99,7 +106,6 @@
     (is (closeto? 0.0 (example-cost prediction actual)))))
               
 
-(comment
 (deftest test-cost
   (let [X (alg/matrix [[0 0][0 1] [1 0][1 1]])
         thetas {1 (alg/matrix [[-30 20 20][10 -20 -20]])
@@ -107,5 +113,6 @@
         xnorcost (cost thetas X (alg/matrix [[1.0][0.0][0.0][1.0]]) 0.0)]
     (is (closeto? 0.0 xnorcost))
     ))
+(comment
  ) 
 

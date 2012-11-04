@@ -118,15 +118,18 @@
 (defn regularize
   [lambda m thetamap]
   ; not using reduce-kv as I want to modify each collection before reducing them
-  (reduce
-    #(+ %1 (Math/pow %2 2))
-    0
-    ; flatten to one big list of theta values
-    (flatten
-      ; conver to a list of x1...xn terms
-      (map
-        ; take the value, drop the x0 term
-        #(rest (second %)) thetamap))))
+  (* (/ lambda (* 2 m))
+    (reduce
+      ; TODO: want to use incanter sum-of-squares but getting errors with number types for matrices
+      #(+ %1 (Math/pow %2 2))
+      0
+      ; flatten to one big list of theta values
+      (flatten
+        ; conver to a list of x1...xn terms
+        (map
+          ; take the value, drop the x0 term
+          ; TODO: currently not removing the x0 term
+          (comp alg/to-vect second) thetamap)))))
 
  
 ; TODO: determine if I want to unroll parameters - is it required for optimization libraries?
