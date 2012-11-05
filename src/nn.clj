@@ -95,6 +95,7 @@
         zeroterm (alg/mmult (alg/minus 1 a) (alg/log (alg/minus 1 ptrans)))]
       (+ oneterm zeroterm)))
 
+;TODO: don't actually need z-vals, remove again
 (defn forward-prop
   "Returns map containing :prediction (the predicted value of the network) and :activations (a map from layer to the activation values for that layer)
   based on inputs X (mxn) and map of theta values - keyed by layer, maps to theta value matrix.  X is NOT expected to
@@ -162,10 +163,23 @@
               m))))))
 
 (defn network-errors
-  "Computes the current network error deltas"
-  [activations Y]
+  "Computes the current network error deltas.  Returns a map keyed by layer
+  mapping to the error value."
+  [activations thetamap Y]
   (let [L (count activations)]
-    nil))
+    (loop [errorLast (alg/minus (activations L) Y)
+           activations_current (activations (dec L))
+           result { L errorLast }
+           layerIndex (dec L)]
+      (if (= 1 layerIndex) result
+        (let [thetas (thetamap layerIndex)
+              error (alg/mult 
+                      (alg/mmult (alg/trans thetas) errorLast)
+                      (alg/mult activations_current (alg/minus 1 activations_current)))]
+          (recur error 
+                 (activations (dec layerIndex)) ; this is a little awkward, move to let above?
+                 (assoc result layerIndex error)
+                 (dec layerIndex)))))))
 
 (defn gradients
   "Uses back propagation to compute the gradients for specific network and inputs"

@@ -113,6 +113,13 @@
         xnorcost (cost thetas X (alg/matrix [[1.0][0.0][0.0][1.0]]) 0.0)]
     (is (closeto? 0.0 xnorcost))
     ))
-(comment
- ) 
+
+(deftest test-network-errors
+  (let [X (alg/matrix [[0 0][0 1] [1 0][1 1]])
+        thetas {1 (alg/matrix [[-30 20 20][10 -20 -20]])
+                2 (alg/matrix [[-10 20 20]])}
+        expected (alg/matrix [[1.0][0.0][0.0][1.0]])
+        activations (:activations (forward-prop X thetas))
+        errors (network-errors activations thetas expected)]
+    nil))
 
