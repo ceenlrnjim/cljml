@@ -76,12 +76,12 @@
   (let [X (alg/matrix [[0 0]])
         thetas {1 (alg/matrix [[-30 20 20][10 -20 -20]])
                 2 (alg/matrix [[-10 20 20]])}
-        prediction (forward-prop X thetas)]
+        prediction (:prediction (forward-prop X thetas))]
     (is (every? #(closeto? 0 %) (alg/minus (alg/matrix [[1.0]]) prediction))))
   (let [X (alg/matrix [[0 0][0 1] [1 0][1 1]])
         thetas {1 (alg/matrix [[-30 20 20][10 -20 -20]])
                 2 (alg/matrix [[-10 20 20]])}
-        prediction (forward-prop X thetas)]
+        prediction (:prediction (forward-prop X thetas))]
     (is (every? #(closeto? 0 %) (alg/minus (alg/matrix [[1.0][0.0][0.0][1.0]]) prediction)))))
 
 (deftest test-regularize
@@ -97,11 +97,11 @@
   (is (closeto? -0.030151 (example-cost (alg/matrix [[0.99 0.01 0.01]]) (alg/matrix [[1 0 0]]))))
   (is (closeto? -0.16252 (example-cost (alg/matrix [[0.85]]) (alg/matrix [[1]]))))
   (is (closeto? -2.2493 (example-cost (alg/matrix [[0.25 0.25 0.25 0.25]]) (alg/matrix [[0 0 1 0]]))))
-  (let [prediction (forward-prop
-                        (alg/matrix [[0 0]])
-                        ; xnor network
-                        {1 (alg/matrix [[-30 20 20][10 -20 -20]])
-                         2 (alg/matrix [[-10 20 20]])})
+  (let [prediction (:prediction (forward-prop
+                                  (alg/matrix [[0 0]])
+                                  ; xnor network
+                                  {1 (alg/matrix [[-30 20 20][10 -20 -20]])
+                                   2 (alg/matrix [[-10 20 20]])}))
         actual 1.0]
     (is (closeto? 0.0 (example-cost prediction actual)))))
               

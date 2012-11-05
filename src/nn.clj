@@ -96,24 +96,26 @@
       (+ oneterm zeroterm)))
 
 (defn forward-prop
-  "Returns the predicted value of the network based on inputs X (mxn) and
-  map of theta values - keyed by layer, maps to theta value matrix.  X is NOT expected to
+  "Returns map containing :prediction (the predicted value of the network) and :activations (a map from layer to the activation values for that layer)
+  based on inputs X (mxn) and map of theta values - keyed by layer, maps to theta value matrix.  X is NOT expected to
   have any X0 bias terms already added."
   [X thetas]
   (let [L (inc (count thetas))
         [setsize featurecount] (alg/dim X) ]
     (loop [unbiasedA X
-           thetaix 1]
+           thetaix 1 
+           result {1 X}]
       (if (>= thetaix L)
-        unbiasedA
+        (assoc result :prediction unbiasedA)
         (do
           (println "Adding bias column to A (" (alg/dim unbiasedA)") of size [" setsize ",1]")
           (let [A (column-cat (ones setsize 1) unbiasedA)]
             (println "computing activation values for thetas" thetaix)
             (println "thetaix=" thetaix "L=" L "A=" (alg/dim A) "theta=" (alg/dim (thetas thetaix)))
+              ; TODO: probably want to keep z and a values for later
               (let [nextZ (alg/mmult A (alg/trans (thetas thetaix)))
                     nextA (sigmoid nextZ)]
-                (recur nextA (inc thetaix)))))))))
+                (recur nextA (inc thetaix) (assoc result (inc thetaix) nextA)))))))))
 
 (defn regularize
   [lambda m thetamap]
@@ -140,12 +142,11 @@
   Also note that Y could also be a vector where the output is multi-class classification"
   [thetas X Y regparam]
   (println "cost for (thetas,x,y)" thetas "|" X "|" Y)
-  ; TODO: probably want to keep z and a values for later
   ; m = # training set examples, k = number of labels
   ; L = total number of layers
   {:pre [(= (first (alg/dim X)) (first (alg/dim Y)))]}
   (let [[m k] (alg/dim Y) ; useful parameters
-        predictions (forward-prop X thetas)]
+        predictions (:prediction (forward-prop X thetas))]
     (println "All Predictions: " predictions "(dim " (alg/dim predictions) ") and all actuals" Y "(dim" (alg/dim Y)")")
     (let [subcosts (map #(example-cost %1 %2) predictions Y)
           costsize (count subcosts)
@@ -155,7 +156,10 @@
              (/ (reduce (fn [sum costi] (+ sum costi)) 0 subcosts)
               m))))))
 
-
+(defn gradients
+  "Uses back propagation to compute the gradients for specific network and inputs"
+  [X]
+  nil)
 ; ------------------------------------------- Tested and working above here ---------------------------------
 (comment
 (defn count-layers
