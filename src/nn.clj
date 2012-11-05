@@ -104,7 +104,7 @@
         [setsize featurecount] (alg/dim X) ]
     (loop [unbiasedA X
            thetaix 1 
-           result {1 X}]
+           result {:activations {1 X} :zvals {}}]
       (if (>= thetaix L)
         (assoc result :prediction unbiasedA)
         (do
@@ -112,10 +112,15 @@
           (let [A (column-cat (ones setsize 1) unbiasedA)]
             (println "computing activation values for thetas" thetaix)
             (println "thetaix=" thetaix "L=" L "A=" (alg/dim A) "theta=" (alg/dim (thetas thetaix)))
-              ; TODO: probably want to keep z and a values for later
               (let [nextZ (alg/mmult A (alg/trans (thetas thetaix)))
                     nextA (sigmoid nextZ)]
-                (recur nextA (inc thetaix) (assoc result (inc thetaix) nextA)))))))))
+                (recur nextA 
+                       (inc thetaix) 
+                       (assoc result 
+                              ; want to keep and return z and a values for use
+                              ; later by back propagation
+                              :activations (assoc (:activations result) (inc thetaix) nextA)
+                              :zvals (assoc (:zvals result) (inc thetaix) nextZ))))))))))
 
 (defn regularize
   [lambda m thetamap]
@@ -156,10 +161,17 @@
              (/ (reduce (fn [sum costi] (+ sum costi)) 0 subcosts)
               m))))))
 
+(defn network-errors
+  "Computes the current network error deltas"
+  [activations Y]
+  (let [L (count activations)]
+    nil))
+
 (defn gradients
   "Uses back propagation to compute the gradients for specific network and inputs"
-  [X]
-  nil)
+  [X thetamap Y]
+  (let [{:keys [prediction activations zvals]} (forward-prop X thetamap)]
+    nil))
 ; ------------------------------------------- Tested and working above here ---------------------------------
 (comment
 (defn count-layers
