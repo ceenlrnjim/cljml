@@ -125,12 +125,20 @@
                              
 
 (defn regularize
-  [lambda m thetamap]
+  "Supports both cost and gradient regularization"
+  ; this is the cost use case
+  ([lambda m thetamap]
+   (regularize lambda m thetamap 2))
+  ; this is the gradient use case
+  ([lambda thetamap]
+   (regularize lambda 1 thetamap 1))
+  ; General case
+  ([lambda lambda-divisor thetamap theta-power]
   ; not using reduce-kv as I want to modify each collection before reducing them
-  (* (/ lambda (* 2 m))
+  (* (/ lambda (* 2 lambda-divisor))
     (reduce
       ; TODO: want to use incanter sum-of-squares but getting errors with number types for matrices
-      #(+ %1 (Math/pow %2 2))
+      #(+ %1 (Math/pow %2 theta-power))
       0
       ; flatten to one big list of theta values
       (flatten
@@ -138,7 +146,7 @@
         (map
           ; take the value, drop the x0 term
           ; TODO: currently not removing the x0 term
-          (comp alg/to-vect second) thetamap)))))
+          (comp alg/to-vect second) thetamap))))))
 
  
 ; TODO: determine if I want to unroll parameters - is it required for optimization libraries?
@@ -185,9 +193,20 @@
 
 (defn gradients
   "Uses back propagation to compute the gradients for specific network and inputs"
-  [X thetamap Y]
-  (let [{:keys [prediction activations zvals]} (forward-prop X thetamap)]
-    nil))
+  [X thetamap Y regparam]
+  (let [[m n] (alg/dim X)
+        fpr (forward-prop X thetamap)
+        errs (network-errors fpr thetamap Y)]
+    ; return a map from Layer to gradients for that layer
+    ; TODO: is this the best format for returning?
+    (reduce (fn [result [k v]]
+              (assoc result k 
+                     ; this is the calculation for the gradient value
+                     ; for a specific layer
+                     (alg/plus (alg/mult (/ 1 m) v) (regularize regparam thetamap))))
+            {}
+            errs)))
+
 ; ------------------------------------------- Tested and working above here ---------------------------------
 (comment
 (defn count-layers
