@@ -119,7 +119,7 @@
         thetas {1 (alg/matrix [[-30 20 20][10 -20 -20]])
                 2 (alg/matrix [[-10 20 20]])}
         expected (alg/matrix [[1.0][0.0][0.0][1.0]])
-        activations (:activations (forward-prop X thetas))
-        errors (network-errors activations thetas expected)]
+        fpr (forward-prop X thetas)
+        errors (network-errors fpr thetas expected)]
     nil))
 

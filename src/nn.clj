@@ -117,11 +117,11 @@
                     nextA (sigmoid nextZ)]
                 (recur nextA 
                        (inc thetaix) 
-                       (assoc result 
+                       (assoc-in result [:activations thetaix] A)))))))))
                               ; want to keep and return z and a values for use
                               ; later by back propagation
-                              :activations (assoc (:activations result) (inc thetaix) nextA)
-                              :zvals (assoc (:zvals result) (inc thetaix) nextZ))))))))))
+                              ;:activations (assoc (:activations result) thetaix ))A)
+                             
 
 (defn regularize
   [lambda m thetamap]
@@ -165,16 +165,17 @@
 (defn network-errors
   "Computes the current network error deltas.  Returns a map keyed by layer
   mapping to the error value."
-  [activations thetamap Y]
+  [{:keys [activations prediction]} thetamap Y]
   (let [L (count activations)]
-    (loop [errorLast (alg/minus (activations L) Y)
+    (loop [errorLast (alg/minus prediction Y)
            activations_current (activations (dec L))
            result { L errorLast }
            layerIndex (dec L)]
+      (println "computing error for layer " layerIndex " of " L)
       (if (= 1 layerIndex) result
         (let [thetas (thetamap layerIndex)
               error (alg/mult 
-                      (alg/mmult (alg/trans thetas) errorLast)
+                      (alg/mmult errorLast thetas) ; for L-1, mx1 * 1x3 for XNOR network
                       (alg/mult activations_current (alg/minus 1 activations_current)))]
           (recur error 
                  (activations (dec layerIndex)) ; this is a little awkward, move to let above?
