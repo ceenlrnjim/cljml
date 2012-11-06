@@ -121,5 +121,10 @@
         expected (alg/matrix [[1.0][0.0][0.0][1.0]])
         fpr (forward-prop X thetas)
         errors (network-errors fpr thetas expected)]
-    (println errors)))
+    ;TODO: need more test cases and tests
+    (is (= (count errors) 2)) ; no errors for the input layer
+    (println errors)
+    ; passing in the right answer so errors should be very small
+    (is (every? #(closeto? 0 %) (errors 3)))
+    (is (every? #(closeto? 0 %) (alg/vectorize (errors 2))))))
 
