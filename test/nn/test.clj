@@ -121,5 +121,5 @@
         expected (alg/matrix [[1.0][0.0][0.0][1.0]])
         fpr (forward-prop X thetas)
         errors (network-errors fpr thetas expected)]
-    nil))
+    (println errors)))
 

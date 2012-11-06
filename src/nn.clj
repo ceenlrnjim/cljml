@@ -105,9 +105,10 @@
         [setsize featurecount] (alg/dim X) ]
     (loop [unbiasedA X
            thetaix 1 
-           result {:activations {1 X} :zvals {}}]
+           result {:activations {1 X}}]
       (if (>= thetaix L)
-        (assoc result :prediction unbiasedA)
+        ; add the final result as the prediction and into the activations values
+        (assoc-in (assoc result :prediction unbiasedA) [:activations L] unbiasedA)
         (do
           (println "Adding bias column to A (" (alg/dim unbiasedA)") of size [" setsize ",1]")
           (let [A (column-cat (ones setsize 1) unbiasedA)]
@@ -167,7 +168,7 @@
   mapping to the error value."
   [{:keys [activations prediction]} thetamap Y]
   (let [L (count activations)]
-    (loop [errorLast (alg/minus prediction Y)
+    (loop [errorLast (alg/minus (activations L) Y)
            activations_current (activations (dec L))
            result { L errorLast }
            layerIndex (dec L)]
