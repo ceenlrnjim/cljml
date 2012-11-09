@@ -46,6 +46,11 @@
             (take ix trans-m)
             (drop (inc ix) trans-m)))))
 
+(defn unroll
+  "Returns a vector of the content from all the matricies that are the values in the provided map"
+  [mm]
+  (alg/matrix (flatten (map alg/vectorize (vals mm)))))
+
 (defn rand-theta
   "Returns a matrix of size out by in+1 containing some randomly initialized weights"
   ([rows cols] (rand-theta rows cols INIT_EPSILON))
@@ -207,60 +212,21 @@
             {}
             errs)))
 
+(defn estimate-gradients
+  "computes a linear estimate for the gradients of the network described by thetamap
+  for inputs X and outputs Y"
+  ([thetamap X Y regparam] (estimate-gradients thetamap X Y regparam 0.001))
+  ([thetamap X Y regparam epsilon]
+    nil))
+;
+; gradient checking
+(defn validate-gradients
+  [backprop-gradient-map costFn]
+  )
+
+; TODO can I use incanter/optimize to solve for the parameters?
+
 ; ------------------------------------------- Tested and working above here ---------------------------------
-(comment
-(defn count-layers
-  "Returns the number of layers in the specified network"
-  [nn]
-  (+ 2 (:hidden-layers nn))
-
-
-; network definition
-(defn create-network
-    "Returns a data structure that represents a neural network with the
-     specified number of input and output units.  Each additional paramter is used as the number of units in
-     a hidden layer (s2, s3, ...s(L-1))"
-    [input-units output-units hidden-layers hidden-units]
-    {:input-units input-units
-     :output-units output-units
-     :hidden-layers hidden-layers
-     :hidden-units hidden-units
-     ; Map from layer number (1 indexed) to the matrix of parameter values for that layer
-     :parameters (initialize-parameters input-units output-units hidden-layers hidden-units)})
-
-
-; backward prop
-(defn backward-prop
-  "Performs (Forward and) backward prop on a network for the specified training set to determine the
-  gradients of the network.  returns a map from layer number to a seq of gradient functions with respect to each theta(l)"
-  [nn X Y]
-  ; gather gradient values for each theta
-  (let [m (count X)]
-      (map
-        #(/ % m)
-          (reduce
-            (fn [gradients-vec [xi yi]]
-              (let [fp (forward-prop nn xi); TODO: probably need matrix conversion here for xi
-                    a-vec (:a fp)
-                    z-vec (:z fp)
-                    delta-last (alg/minus (last a-vec) yi)]
-                  (loop [result gradients-vec
-                         prev-delta delta-last
-                         layer (dec (count-layers nn))]
-                    (if (= 1 layer) result
-                        (let [theta ((:parameters nn) (dec layer))
-                              ; NOTE: this is elementwise multiplication, not matrix
-                              delta (alg/mult
-                                        (alg/mmult (alg/trans (drop-column theta 0) prev-delta)
-                                                          ; TODO: dec?
-                                        (sigmoid-gradient (z-vec layer))))]
-                                                 ; 0 index structure
-                                                                                                           ; TODO: dec?
-                            (recur (assoc result (dec layer) (+ (result (dec layer)) (alg/mmult prev-delta (a-vec layer))))
-                                   delta
-                                   (dec layer)))))))
-            (map (partial * 0) (range 1 (count-layers nn))) ; vector of zeros for each theta gradient
-            (interleave X Y))))))
 
 ; training
 (defn apply-gradients
@@ -285,10 +251,6 @@
 
 ; prediction - re-use forward-prop?
 
-) ; end comment
+; end comment
 
-; gradient checking
-(defn validate-gradients
-  [backprop-gradient-map costFn]
-  )
 

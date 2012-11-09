@@ -135,4 +135,11 @@
                 2 (alg/matrix [[-10 20 20]])}
         expected (alg/matrix [[1.0][0.0][0.0][1.0]])
         grads (gradients X thetas expected 0)]
+    ; TODO: implement some tests
     (println "gradients:" grads)))
+
+(deftest test-unroll
+  (let [x (alg/matrix [[1 1 1] [2 2 2] [3 3 3]])
+        y (alg/matrix [[4 4][5 5][6 6][7 7][8 8]])
+        result (unroll {1 x 2 y})]
+    (is (= result (alg/matrix [1.0 2.0 3.0 1.0 2.0 3.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 4.0 5.0 6.0 7.0 8.0])))))
