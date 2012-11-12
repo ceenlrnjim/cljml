@@ -1,6 +1,14 @@
 (ns logregvec
   (:require [incanter.core :as alg]))
 
+; helper functions
+; TODO: must be a better way
+(defn set-vector-value-at
+  "returns the specified vector with the specified value at the specified index"
+  [v ix value]
+  (let [multiplier (map-indexed (fn [i _] (if (= i ix) 0 1)) v)
+        adder (map-indexed (fn [i _] (if (= i ix) value 0)) v)]
+    (alg/plus adder (alg/mult multiplier v))))
 
 ; Calculations functions -----------------------------------------------
 (defn next-thetas
@@ -12,18 +20,15 @@
 
 
 ; API functions -----------------------------------------------
-; TODO: add regularization support
 ; TODO: where do I need the cost function? Just to track progress?
-; TODO: change to map based arguments for clarity?
-(defn optimize [initial-thetas learning-rate costfn gradientfn maxiters]
-  (loop [iters maxiters
+(defn optimize [{:keys [initial-thetas learning-rate cost-fn gradient-fn max-iters]}]
+  (loop [iters max-iters
          thetas initial-thetas]
-    ;(println "Iteration: " iters " cost=" (costfn thetas))
+    ;(println "Iteration: " iters " cost=" (cost-fn thetas))
     (if (= 0 iters) thetas
       (recur 
         (dec iters)
-        (next-thetas thetas learning-rate gradientfn)))))
-
+        (next-thetas thetas learning-rate gradient-fn)))))
 
 ; Algorithm functions -----------------------------------------------
 (defn sigmoid
@@ -51,9 +56,12 @@
 
 (defn linlog-gradients 
   "Returns a function of parameters theta that return the gradient value relative to each feature xj"
-  [hypfn X y]
-  (fn [thetas]
-    (let [[setsize features] (alg/dim X)
-          predicted (hypfn thetas X)
-          errors (alg/minus predicted y)]
-      (alg/mult (/ 1 setsize) (alg/mmult (alg/trans X) errors)))))
+  ([hypfn X y] (linlog-gradients hypfn X y 0))
+  ([hypfn X y regparam]
+    (fn [thetas]
+      (let [[setsize features] (alg/dim X)
+            predicted (hypfn thetas X)
+            errors (alg/minus predicted y)
+            regterm (set-vector-value-at (alg/mult (/ regparam setsize) thetas) 0 0)]
+        ; Don't want to regularize x0 term (theta j where j=0)
+        (alg/plus regterm (alg/mult (/ 1 setsize) (alg/mmult (alg/trans X) errors)))))))
