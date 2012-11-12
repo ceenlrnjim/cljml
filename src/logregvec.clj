@@ -49,10 +49,18 @@
 
 (defn linlog-cost
   "returns the cost for the specified thetas and hypothsis function using the squared error"
-  [hypfn X y]
+  ([hypfn X y] (linlog-cost hypfn X y 0))
+  ([hypfn X y regparam]
   (fn [thetas]
-    (let [[m n] (alg/dim X)]
-      (alg/mult (/ 1 (* 2 m)) (alg/pow (alg/minus (hypfn thetas X) y))))))
+    (let [[m n] (alg/dim X)
+          regterm (* regparam (alg/sum (alg/pow thetas 2)))] ; TODO: theta0 regularized as well?
+      ; TODO: is this 'sum' correct - I don't want a vector of costs, but a scalar - double check with notes
+      (* (/ 1 (* 2 m))
+        (+ regterm 
+          (alg/sum 
+            (alg/pow 
+              (alg/minus (hypfn thetas X) y) 
+              2))))))))
 
 (defn linlog-gradients 
   "Returns a function of parameters theta that return the gradient value relative to each feature xj"
