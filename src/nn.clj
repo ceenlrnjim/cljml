@@ -70,6 +70,39 @@
   [mm]
   (alg/matrix (flatten (map alg/vectorize (vals mm)))))
 
+(defn subvec-matrix
+  "Returns a matrix of the specified dimension based on the appropriate number of
+  elements from the specified row vector starting at index ix"
+  [rv ix [rows cols]]
+  (alg/matrix (alg/$ (range ix (+ ix (* rows cols))) rv) cols))
+
+(defn els
+  "returns the number elements in the specified dimension"
+  [[rows cols]]
+  (* rows cols))
+
+(defn reroll
+  "Returns a map of l to the matrix of parameters for layer l from the unrolled vector
+  of parameter values and the supplied network definitions"
+  [paramvec {:keys [input-units hidden-layers hidden-units output-units]}]
+  (let [paramrow (alg/trans paramvec)
+        layers (+ 2 hidden-layers)
+        l1dim (if (> hidden-units 0) [hidden-units (inc input-units)] [output-units (inc input-units)])
+        hidden-to-hidden-dim [hidden-units (inc hidden-units)]
+        hidden-to-output-dim [output-units (inc hidden-units)]
+        result-seed (assoc {} 1 (subvec-matrix paramrow 0 l1dim))]
+    (cond (= 2 layers) result-seed
+          (> 2 layers) 
+            (loop [result (assoc result-seed (dec layers) (subvec-matrix paramrow (els l1dim) hidden-to-output-dim))
+                   ix 0
+                   lastend (els l1dim)]
+              (if (= ix hidden-layers) result
+                (recur (assoc result 
+                              (+ 2 ix) 
+                              (subvec-matrix paramrow lastend hidden-to-hidden-dim))
+                       (inc ix)
+                       (+ lastend (els hidden-to-hidden-dim))))))))
+
 (defn rand-theta
   "Returns a matrix of size out by in+1 containing some randomly initialized weights"
   ([rows cols] (rand-theta rows cols INIT_EPSILON))
