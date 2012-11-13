@@ -1,5 +1,6 @@
 (ns nn
-    (:require [incanter.core :as alg]))
+  (:require [logregvec :as gd])
+  (:require [incanter.core :as alg]))
 
 (def INIT_EPSILON 0.12) ;
 
@@ -217,7 +218,8 @@
 (defn gradients
   "Uses back propagation to compute the gradients for specific network and inputs"
   [X thetamap Y regparam]
-; TODO: ** this needs to return a function that takes the thetas and computes the gradient **
+  ; TODO: ** this needs to return a function that takes the thetas and computes the gradient **
+  ; Or it needs to be curried when used to a function of one parameter
   (let [[m n] (alg/dim X)
         fpr (forward-prop X thetamap)
         errs (network-errors fpr thetamap Y)]
@@ -254,33 +256,22 @@
   [bp-grads estimate-grads tolerance]
   )
 
+(defn train-network
+  "network layout is a map with keywords matching initialize-parameters. Returns a classifier function."
+  [network-layout X Y regparam learning-rate max-iters]
+  (let [gradient-fn (fn [thetamap] (gradients X thetamap Y regparam))
+        cost-fn (fn [thetamap] (cost thetamap X Y regparam))
+    ; currently using home-brew gradient descent
+    ; TODO: map with multiple thetas will break the optimize function
+    ; - probably need to unroll the parameters and this probably impacts the gradient function above
+    opt-thetas (gd/optimize {:initial-thetas (initialize-parameters network-layout)
+                          :learning-rate learning-rate
+                          :cost-fn cost-fn
+                          :gradient-fn gradient-fn
+                          :max-iters max-iters})]
+  (fn [x]
+    (forward-prop x opt-thetas))))
+
 ; TODO can I use incanter/optimize to solve for the parameters?
-
-; ------------------------------------------- Tested and working above here ---------------------------------
-
-; training
-(defn apply-gradients
-  "Gradients is a sequence of the matrix of values for the derivative of the cost function with respect to the index of the
-  matrix in the sequence (+1 for one indexed layers)"
-  [gradients theta]
-)
-
- 
-(defn gradient-descent
-  "given a network (with its training sets, a cost function and a map of gradient functions, perform gradient descent
-  and return the optimized set of theta values"
-  [costfn gradients numiters alpha X Y, initialtheta]
-  (let [m (count Y)]
-    (loop [itercount 0
-           theta initialtheta]
-        (if (= itercount numiters) theta
-            (recur (inc itercount)
-                (alg/minus theta
-                    (alg/mult alpha
-                        (apply-gradients gradients theta))))))))
-
-; prediction - re-use forward-prop?
-
-; end comment
 
 
