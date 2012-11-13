@@ -217,6 +217,7 @@
 (defn gradients
   "Uses back propagation to compute the gradients for specific network and inputs"
   [X thetamap Y regparam]
+; TODO: ** this needs to return a function that takes the thetas and computes the gradient **
   (let [[m n] (alg/dim X)
         fpr (forward-prop X thetamap)
         errs (network-errors fpr thetamap Y)]
