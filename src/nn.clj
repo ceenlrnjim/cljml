@@ -13,11 +13,29 @@
       ; g .* (1 - g)
       (alg/mult g (alg/minus 1 g))))
 
+
+(defn zeros
+  [rows cols]
+                   ; convert to all zeros by multiplying by 0
+                                            ; get a collection of enough elements
+  (alg/matrix (map (partial * 0) (range 0 (* rows cols))) cols))
+
 (defn ones
   [rows cols]
                    ; convert to all ones by multiplying by 0 and adding one
                                             ; get a collection of enough elements
-  (alg/matrix (map (comp inc (partial * 0)) (range 0 (* rows cols))) cols))
+  ;(alg/matrix (map (comp inc (partial * 0)) (range 0 (* rows cols))) cols))
+  (alg/plus 1 (zeros rows cols)))
+
+(defn perturb-vector
+  "Returns a vector of all zeros of the specified size except for the indicated index
+  will have value e"
+  [s ix e]
+  (alg/matrix 
+    (assoc
+      (vec (map (partial * 0) (range 0 s)))
+      ix 
+      e)))
 
 (defn column-cat
   "Concatenates the specified matricies together, adding Y as additional columns to X"
@@ -214,14 +232,25 @@
 
 (defn estimate-gradients
   "computes a linear estimate for the gradients of the network described by thetamap
-  for inputs X and outputs Y"
-  ([thetamap X Y regparam] (estimate-gradients thetamap X Y regparam 0.001))
-  ([thetamap X Y regparam epsilon]
-    nil))
+   and the cost function (as a function of the parameters J(theta)"
+  ([thetamap costFn] (estimate-gradients thetamap costFn 0.0001))
+  ([thetamap costFn epsilon]
+   ; Note see ex4/computeNumericalGradient for basis of this implementation
+   (let [thetas (unroll thetamap)
+         [m _] (alg/dim thetas)]
+     (loop [ix 0
+            result (zeros m 1)]
+       (if (= ix m) result
+         (let [perturb (perturb-vector m ix epsilon)
+               loss1 (costFn (alg/minus thetas perturb))
+               loss2 (costFn (alg/plus thetas perturb))
+               newval (/ (- loss2 loss1) (* 2 epsilon))]
+           ;TODO: how to set the cell value to newval?
+           (recur (inc ix) result)))))))
 ;
 ; gradient checking
 (defn validate-gradients
-  [backprop-gradient-map costFn]
+  [bp-grads estimate-grads tolerance]
   )
 
 ; TODO can I use incanter/optimize to solve for the parameters?
