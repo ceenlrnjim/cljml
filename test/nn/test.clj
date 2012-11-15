@@ -128,6 +128,7 @@
     (is (every? #(closeto? 0 %) (errors 3)))
     (is (every? #(closeto? 0 %) (alg/vectorize (errors 2))))))
 
+(comment
 (deftest test-gradients
   (println "test-gradients > ------------------------------------------")
   (let [X (alg/matrix [[0 0][0 1] [1 0][1 1]])
@@ -137,6 +138,7 @@
         grads (gradients X thetas expected 0)]
     ; TODO: implement some tests
     (println "gradients:" grads)))
+  )
 
 (deftest test-unroll
   (let [x (alg/matrix [[1 1 1] [2 2 2] [3 3 3]])

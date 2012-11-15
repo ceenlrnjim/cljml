@@ -81,6 +81,15 @@
   [[rows cols]]
   (* rows cols))
 
+(defn layer-dims
+  "given a sequence of layer sizes, returns a sequence of dimensions for the parameter
+   matrices between the layers"
+  [sizes]
+  (if (empty? (rest sizes)) []
+    (let [[sj sjplus1 & more] sizes]
+      (println sj "--------------------" sjplus1)
+      (cons [sjplus1 (inc sj)] (layer-dims (rest sizes))))))
+
 (defn reroll
   "Returns a map of l to the matrix of parameters for layer l from the unrolled vector
   of parameter values and a sequence of the number of units in each layer from input (index 0)
@@ -89,17 +98,16 @@
   (loop [layerix 1
          lastendix 0
          result {}
-         units sizes]
-   (if (= (count units) 1) result
-     (let [[sj sjplus1 & more] units
-           mdim [sjplus1 (inc sj)]
+         dims (layer-dims sizes)]
+   (if (empty? dims) result
+     (let [mdim (first dims)
            cells (* (mdim 0) (mdim 1))]
        (println "processing layer " layerix " with dimensions" mdim)
        (recur
          (inc layerix)
          (+ lastendix cells)
          (assoc result layerix (subvec-matrix paramvec lastendix mdim))
-         (rest units))))))
+         (rest dims))))))
 
 (defn rand-theta
   "Returns a matrix of size out by in+1 containing some randomly initialized weights"
@@ -248,10 +256,9 @@
 
 (defn gradients
   "Uses back propagation to compute the gradients for specific network and inputs"
-  [X thetamap Y regparam]
-  ; TODO: ** this needs to return a function that takes the thetas and computes the gradient **
-  ; Or it needs to be curried when used to a function of one parameter
+  [X Y thetavec layersizes regparam]
   (let [[m n] (alg/dim X)
+        thetamap (reroll thetavec layersizes)
         fpr (forward-prop X thetamap)
         errs (network-errors fpr thetamap Y)]
     ; return a map from Layer to gradients for that layer
@@ -288,14 +295,14 @@
   )
 
 (defn train-network
-  "network layout is a map with keywords matching initialize-parameters. Returns a classifier function."
+  "network layout is a sequence of the number of nodes in each layer"
   [network-layout X Y regparam learning-rate max-iters]
   (let [gradient-fn (fn [thetamap] (gradients X thetamap Y regparam))
         cost-fn (fn [thetamap] (cost thetamap X Y regparam))
     ; currently using home-brew gradient descent
     ; TODO: map with multiple thetas will break the optimize function
     ; - probably need to unroll the parameters and this probably impacts the gradient function above
-    opt-thetas (gd/optimize {:initial-thetas (initialize-parameters network-layout)
+    opt-thetas (gd/optimize {:initial-thetas (unroll (initialize-parameters network-layout))
                           :learning-rate learning-rate
                           :cost-fn cost-fn
                           :gradient-fn gradient-fn
