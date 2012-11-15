@@ -40,10 +40,7 @@
     (is (not (every? (partial = 0) m)))))
 
 (deftest test-initialize-parameters
-  (let [m (initialize-parameters {:innodes 5
-                                  :outnodes 1
-                                  :hidden-layers 2
-                                  :hidden-units 10})]
+  (let [m (initialize-parameters [5 10 10 1])] 
     (is (= (count m) 3))
     (is (= (alg/dim (m 1)) [10 6]))
     (is (= (alg/dim (m 2)) [10 11]))
@@ -128,9 +125,9 @@
     (is (every? #(closeto? 0 %) (errors 3)))
     (is (every? #(closeto? 0 %) (alg/vectorize (errors 2))))))
 
-(comment
 (deftest test-gradients
   (println "test-gradients > ------------------------------------------")
+         ;TODO: change to use the new unrolled syntax
   (let [X (alg/matrix [[0 0][0 1] [1 0][1 1]])
         thetas {1 (alg/matrix [[-5 5 1][10 -20 -20]])
                 2 (alg/matrix [[-10 20 20]])}
@@ -138,7 +135,6 @@
         grads (gradients X thetas expected 0)]
     ; TODO: implement some tests
     (println "gradients:" grads)))
-  )
 
 (deftest test-unroll
   (let [x (alg/matrix [[1 1 1] [2 2 2] [3 3 3]])
@@ -152,3 +148,7 @@
         x1 {1 (alg/matrix [[1 1 1][1 1 1][1 1 1]])
             2 (alg/matrix [[2 2 2 2]])}]
     (is (= (reroll x1-unrolled [2 3 1]) x1))))
+
+(deftest test-layer-dims
+  (is (= (layer-dims [2 4 4 1])
+         [[4 3][4 5][1 5]])))

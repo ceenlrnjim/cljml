@@ -87,7 +87,6 @@
   [sizes]
   (if (empty? (rest sizes)) []
     (let [[sj sjplus1 & more] sizes]
-      (println sj "--------------------" sjplus1)
       (cons [sjplus1 (inc sj)] (layer-dims (rest sizes))))))
 
 (defn reroll
@@ -126,24 +125,12 @@
 ; TODO: should this be a map or just a vector with appropriate index
 (defn initialize-parameters
   "Returns a map keyed by layer number (1 indexed) that maps to the theta matrix for that maps to layer [l+1]"
-  [{input-units :innodes output-units :outnodes hidden-layers :hidden-layers hidden-units :hidden-units}]
-  ; create a list of node sizes in order [input hidden hidden .... output]
-  (let [layersizes (loop [result [input-units]
-                          h-layers-left hidden-layers]
-                     (if (= h-layers-left 0) (conj result output-units)
-                       (recur (conj result hidden-units) (dec h-layers-left))))
-        ; create sequence of dimensions for the thetas between each layer
-        ; [1 5 5 2] => [(1 5) (5 5) (5 2)]
-        thetadims (loop [sizes layersizes
-                         result []]
-                    (if (empty? (rest sizes)) result
-                      (let [[in out] (take 2 sizes)]
-                        (recur (rest sizes) (conj result [in out])))))]
-    ; built the map of layer to theta
-    (reduce #(assoc %1 (inc (count %1)) %2)
-      {}
-      ; convert each dimension into a matrix of random values
-      (map #(let [[in out] %] (rand-theta out (inc in))) thetadims))))
+  [layersizes]
+  ; built the map of layer to theta
+  (reduce #(assoc %1 (inc (count %1)) %2)
+    {}
+    ; convert each dimension into a matrix of random values
+    (map #(let [[rows cols] %] (rand-theta rows cols)) (layer-dims layersizes))))
 
 (defn example-cost
   "expects predict and actual as 1xK vectors or scalars"
