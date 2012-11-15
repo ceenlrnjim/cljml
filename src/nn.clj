@@ -130,7 +130,8 @@
   (reduce #(assoc %1 (inc (count %1)) %2)
     {}
     ; convert each dimension into a matrix of random values
-    (map #(let [[rows cols] %] (rand-theta rows cols)) (layer-dims layersizes))))
+    ;(map #(let [[rows cols] %] (rand-theta rows cols)) (layer-dims layersizes))))
+    (map (fn [[rows cols]] (rand-theta rows cols)) (layer-dims layersizes))))
 
 (defn example-cost
   "expects predict and actual as 1xK vectors or scalars"
