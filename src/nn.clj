@@ -83,25 +83,23 @@
 
 (defn reroll
   "Returns a map of l to the matrix of parameters for layer l from the unrolled vector
-  of parameter values and the supplied network definitions"
-  [paramvec {:keys [input-units hidden-layers hidden-units output-units]}]
-  (let [paramrow (alg/trans paramvec)
-        layers (+ 2 hidden-layers)
-        l1dim (if (> hidden-units 0) [hidden-units (inc input-units)] [output-units (inc input-units)])
-        hidden-to-hidden-dim [hidden-units (inc hidden-units)]
-        hidden-to-output-dim [output-units (inc hidden-units)]
-        result-seed (assoc {} 1 (subvec-matrix paramrow 0 l1dim))]
-    (cond (= 2 layers) result-seed
-          (> 2 layers) 
-            (loop [result (assoc result-seed (dec layers) (subvec-matrix paramrow (els l1dim) hidden-to-output-dim))
-                   ix 0
-                   lastend (els l1dim)]
-              (if (= ix hidden-layers) result
-                (recur (assoc result 
-                              (+ 2 ix) 
-                              (subvec-matrix paramrow lastend hidden-to-hidden-dim))
-                       (inc ix)
-                       (+ lastend (els hidden-to-hidden-dim))))))))
+  of parameter values and a sequence of the number of units in each layer from input (index 0)
+  to output (index n-1)"
+  [paramvec sizes]
+  (loop [layerix 1
+         lastendix 0
+         result {}
+         units sizes]
+   (if (= (count units) 1) result
+     (let [[sj sjplus1 & more] units
+           mdim [sjplus1 (inc sj)]
+           cells (* (mdim 0) (mdim 1))]
+       (println "processing layer " layerix " with dimensions" mdim)
+       (recur
+         (inc layerix)
+         (+ lastendix cells)
+         (assoc result layerix (subvec-matrix paramvec lastendix mdim))
+         (rest units))))))
 
 (defn rand-theta
   "Returns a matrix of size out by in+1 containing some randomly initialized weights"

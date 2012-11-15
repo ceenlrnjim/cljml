@@ -143,3 +143,10 @@
         y (alg/matrix [[4 4][5 5][6 6][7 7][8 8]])
         result (unroll {1 x 2 y})]
     (is (= result (alg/matrix [1.0 2.0 3.0 1.0 2.0 3.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 4.0 5.0 6.0 7.0 8.0])))))
+
+(deftest test-reroll
+         ; 2 inputs, 3 hidden units, 1 output
+  (let [x1-unrolled (alg/matrix [[1 1 1 1 1 1 1 1 1 2 2 2 2]])
+        x1 {1 (alg/matrix [[1 1 1][1 1 1][1 1 1]])
+            2 (alg/matrix [[2 2 2 2]])}]
+    (is (= (reroll x1-unrolled [2 3 1]) x1))))
